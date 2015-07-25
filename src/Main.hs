@@ -1,4 +1,11 @@
 module Main where
 
+import Rm
+import System.Environment (getArgs)
+
+
 main :: IO ()
-main = undefined
+main = do
+  args <- getArgs
+  mapM_ handleObject args
+
