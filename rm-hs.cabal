@@ -3,13 +3,13 @@
 
 name:                rm-hs
 version:             0.1.0.0
--- synopsis:            
--- description:         
+-- synopsis:
+-- description:
 license:             GPL-2
 license-file:        LICENSE
 author:              Sebastian Ivarsson
 maintainer:          ivarsson.sebastian@gmail.com
--- copyright:           
+-- copyright:
 category:            System
 build-type:          Simple
 extra-source-files:  README.md
@@ -17,8 +17,8 @@ cabal-version:       >=1.10
 
 executable rm-hs
   main-is:             Main.hs
-  -- other-modules:       
-  -- other-extensions:    
-  build-depends:       base >=4.8 && <4.9
+  -- other-modules:
+  other-extensions:    GeneralizedNewtypeDeriving
+  build-depends:       base >=4.8 && <4.9, directory >=1.2 && <1.3, filepath >=1.4 && <1.5, mtl >=2.2 && <2.3, transformers >=0.4 && <0.5
   hs-source-dirs:      src
   default-language:    Haskell2010
