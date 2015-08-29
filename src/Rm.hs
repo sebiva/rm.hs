@@ -3,6 +3,7 @@ module Rm where
 
 import System.Directory
 import System.FilePath
+import Data.Time.Clock
 
 import Control.Applicative
 import Control.Monad
@@ -29,7 +30,8 @@ data RmState = Rms {
 runToIO :: RmMonad a -> RmState -> IO a
 runToIO m s = liftM fst $ runStateT (runRmMonad m) s
 
--- TODO Seb 22/7: Add a custom state monad on top of IO to encapsulate settings
+
+-- TODO 29/8: Remove rel_path from RmState?
 
 getFullPath :: String -> RmMonad FilePath
 getFullPath name = do
@@ -59,17 +61,32 @@ handleObject obj = do
 
 handleFile :: String -> RmMonad Bool
 handleFile filename = do
+  path <- getFullPath filename
   newpath <- getDestPath filename
-  liftIO $ putStrLn $ "To move: " ++ filename ++ " to: " ++ newpath
-  --liftIO $ renameFile filename newpath  TODO Seb 24/8: Actually move the files
+  liftIO $ putStrLn $ "To move: " ++ path ++ " to: " ++ newpath
+  writeMeta path newpath
+  --liftIO $ renameFile path newpath  --TODO Seb 24/8: Actually move the files
   return True -- TODO: Catch exceptions in the IO monad and return a value based on that instead
+
+
+-- TODO: 29/8 Cleanup dead code
 
 handleDir :: String -> RmMonad Bool
 handleDir dirname = do
   path <- getFullPath dirname
-  contents <- liftIO $ getDirectoryContents path
-  modify (\s -> s {rel_path=joinPath [rel_path s, dirname]})  -- Add the dirname to the relative path
-  res <- mapM handleObject contents
-  -- TODO Seb 24/8: Remove the directory too
-  return (and res)
+  newpath <- getDestPath dirname
+  liftIO $ putStrLn $ "To move dir: " ++ path ++ " to: " ++ newpath
+  --liftIO $ renameDirectory path newpath
+  writeMeta path newpath
 
+  --contents <- liftIO $ getDirectoryContents path
+  --modify (\s -> s {rel_path=joinPath [rel_path s, dirname]})  -- Add the dirname to the relative path
+  --res <- mapM handleObject contents
+  -- TODO Seb 24/8: Remove the directory too
+  return True
+
+writeMeta :: FilePath -> FilePath -> RmMonad ()
+writeMeta old new = do
+  time <- liftIO $ getCurrentTime
+  let str = old ++ "\n" ++ new ++ "\n" ++ show time
+  liftIO $ writeFile (new ++ ".meta") str
